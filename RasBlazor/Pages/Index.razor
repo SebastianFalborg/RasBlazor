@@ -1,0 +1,15 @@
+﻿@page "/"
+@page "/{name}"
+@using System
+
+<p>Velkommen @Name</p>
+
+@code {
+	[Parameter]
+	public string Name { get ; set; }
+
+	protected override void OnInitialized()
+	{
+		Name = Name == null ? string.Empty : Name.Replace('-', ' ');
+	}
+}
