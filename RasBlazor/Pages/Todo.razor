@@ -1,5 +1,4 @@
 ﻿@page "/todo"
-@inject LocalStorageService LocalStorageService
 
 <h1>Todo (@todos.Count(todo => !todo.IsDone))</h1>
 
@@ -24,13 +23,6 @@
 		{
 			todos.Add(new TodoItem { Title = newTodo });
 			newTodo = string.Empty;
-
-			await LocalStorageService.SetItemAsync(nameof(todos), todos);
 		}
-	}
-
-	protected override async Task OnInitializedAsync()
-	{
-		todos = await LocalStorageService.GetItemAsync<IList<TodoItem>>(nameof(todos));
 	}
 }
