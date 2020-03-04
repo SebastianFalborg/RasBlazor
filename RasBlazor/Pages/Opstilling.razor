@@ -1,0 +1,36 @@
+﻿@page "/opstilling"
+
+<div class="row">
+	<div class="col-3">
+		<div class="row">
+			<input placeholder="Gymnast navn" @bind="addGymnastName" />
+			<button @onclick="AddGymnast">Add todo</button>
+		</div>
+		<div class="row">
+			<ul>
+				@foreach (var gymnast in gymnastList)
+				{
+					<GymnastComponent gymnast="gymnast"></GymnastComponent>
+				}
+			</ul>
+		</div>
+	</div>
+	<div class="col-9">
+		
+	</div>
+</div>
+
+@code {
+	private string addGymnastName;
+
+	public IList<Gymnast> gymnastList = new List<Gymnast>();
+
+	public void AddGymnast()
+	{
+		if (!string.IsNullOrEmpty(addGymnastName))
+		{
+			gymnastList.Add(new Gymnast() { Name = addGymnastName } );
+			addGymnastName = string.Empty;
+		}
+	}
+}

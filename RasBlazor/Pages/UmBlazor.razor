@@ -1,0 +1,25 @@
+﻿@page "/umblazor"
+@using Umbraco.Headless.Client.Net.Delivery;
+
+
+<h2>@content.Name</h2>
+<ul>
+	@foreach (var value in content.Properties.Values)
+	{
+		<li>@value.ToString()</li>
+	}
+</ul>
+
+@code {
+	Umbraco.Headless.Client.Net.Delivery.Models.Content content = new Umbraco.Headless.Client.Net.Delivery.Models.Content();
+
+	protected override async Task OnInitializedAsync()
+	{
+		var projectAlias = "sebastians-frank-wombat";
+		var username = "sebastianfalborg@gmail.com";
+		var password = "1234567890";
+		var service = new ContentDeliveryService(projectAlias, username, password);
+		var frontpage = await service.Content.GetById(new Guid("275d2ba8-0ee1-4730-83e7-0e167a1dc94b"));
+		content = frontpage;
+	}
+}

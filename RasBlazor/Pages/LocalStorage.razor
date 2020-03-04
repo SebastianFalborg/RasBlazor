@@ -1,0 +1,31 @@
+﻿@page "/localstorage"
+@inject LocalStorageService LocalStorageService
+
+<h1>Local storage test</h1>
+
+<textarea @bind="noteContent" />
+<br />
+<button @onclick="UpdateLocalStorage">Save</button>
+<button @onclick="ClearLocalStorage">Clear</button>
+
+
+@code{
+	const string noteKey = "note";
+	string noteContent;
+
+	public async void UpdateLocalStorage()
+	{
+		await LocalStorageService.SetItemAsync(noteKey, noteContent);
+	}
+
+	public async void ClearLocalStorage()
+	{
+		noteContent = "";
+		await LocalStorageService.ClearAsync();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		noteContent = await LocalStorageService.GetItemAsync<string>(noteKey);
+	}
+}
