@@ -1,6 +1,7 @@
 ﻿@page "/opstilling"
 
 <div class="row">
+
 	<div class="col-3">
 		<div class="row">
 			<input placeholder="Gymnast navn" @bind="addGymnastName" />
@@ -10,27 +11,79 @@
 			<ul>
 				@foreach (var gymnast in gymnastList)
 				{
-					<GymnastComponent gymnast="gymnast"></GymnastComponent>
+					<GymnastComponent Gymnast="gymnast"></GymnastComponent>
 				}
 			</ul>
 		</div>
 	</div>
 	<div class="col-9">
-		
+		@foreach (var gymnast in gymnastsOnFloor)
+		{
+			<GymnastComponent ReturnGymnast="@HandleGymnastClick" Gymnast="gymnast"></GymnastComponent>
+		}
+	</div>
+	<div>
+		<p>@addGymnastName</p>
+		<GymnastComponent Gymnast="currentlyClickedGymnast"></GymnastComponent>
+
 	</div>
 </div>
 
 @code {
-	private string addGymnastName;
+	private IList<Gymnast> gymnastList = new List<Gymnast>();
 
-	public IList<Gymnast> gymnastList = new List<Gymnast>();
+	private string addGymnastName;
 
 	public void AddGymnast()
 	{
 		if (!string.IsNullOrEmpty(addGymnastName))
 		{
-			gymnastList.Add(new Gymnast() { Name = addGymnastName } );
+			gymnastList.Add(new Gymnast() { Name = addGymnastName });
 			addGymnastName = string.Empty;
 		}
+	}
+
+	private IList<Gymnast> gymnastsOnFloor = new List<Gymnast>();
+
+	private Gymnast currentlyClickedGymnast = new Gymnast();
+
+	public void HandleGymnastClick(Gymnast? gymnast)
+	{
+		if (gymnast == null)
+		{
+			currentlyClickedGymnast = null;
+		}
+		else
+		{
+			if (currentlyClickedGymnast == null)
+			{
+				currentlyClickedGymnast = gymnast;
+			}
+			else
+			{
+				if (gymnastsOnFloor.Contains(currentlyClickedGymnast) && gymnastList.Contains(gymnast) || gymnastsOnFloor.Contains(gymnast) && gymnastList.Contains(currentlyClickedGymnast))
+				{
+					var onFloorIndex = gymnastsOnFloor.IndexOf(currentlyClickedGymnast);
+					var gymnastListIndex = gymnastList.IndexOf(gymnast);
+					var tempGymnast = currentlyClickedGymnast;
+					gymnastsOnFloor[onFloorIndex] = gymnast;
+					gymnastList[gymnastListIndex] = tempGymnast;
+				}
+				else if (gymnastsOnFloor.Contains(currentlyClickedGymnast) && gymnastsOnFloor.Contains(gymnast))
+				{
+					var onFloorIndex = gymnastsOnFloor.IndexOf(currentlyClickedGymnast);
+					var onFloorSwitchIndex = gymnastsOnFloor.IndexOf(gymnast);
+					var tempGymnast = currentlyClickedGymnast;
+					gymnastsOnFloor[onFloorIndex] = gymnast;
+					gymnastsOnFloor[onFloorSwitchIndex] = tempGymnast;
+				}
+				else
+				{
+					currentlyClickedGymnast = null;
+				}
+			}
+		}
+		this.StateHasChanged();
+
 	}
 }

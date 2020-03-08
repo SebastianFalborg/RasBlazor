@@ -1,8 +1,16 @@
 ﻿<li>
-	<h3>@gymnast.Name</h3>
+	<button class="btn-group-lg" @onclick="@InvokeParentMethod">@Gymnast.Name</button>
 </li>
 
 @code {
 	[Parameter]
-	public Gymnast gymnast { get; set; }
+	public Gymnast Gymnast { get; set; }
+
+	[Parameter]
+	public Action<Gymnast> ReturnGymnast { get; set; }
+
+	private void InvokeParentMethod()
+	{
+		ReturnGymnast?.Invoke(Gymnast);
+	}
 }
