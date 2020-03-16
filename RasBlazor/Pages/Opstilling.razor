@@ -1,89 +1,239 @@
 ﻿@page "/opstilling"
 
-<div class="row">
-
-	<div class="col-3">
-		<div class="row">
-			<input placeholder="Gymnast navn" @bind="addGymnastName" />
-			<button @onclick="AddGymnast">Add todo</button>
+<div class="container">
+	<div class="row">
+		<div class="col-md-3">
+			<div class="row">
+				<button @onclick="AddRow">Add row</button>
+				<button @onclick="AddColumn">Add column</button>
+				<p>CurrentGymnast: @currentlyClickedGymnast.Name</p>
+			</div>
+			<div class="row">
+				<input placeholder="Gymnast navn" @bind="addGymnastName" @onkeyup="AddGymnast" />
+				<button @onclick="AddGymnast">Add todo</button>
+			</div>
+			<div class="row">
+				<ul class="list-group">
+					@foreach (var gymnast in gymnastList)
+					{
+						<GymnastComponent FloorSpace="false" Gymnast="gymnast" Clicked="ChildComponentIsClicked(gymnast)" ReturnGymnast="@HandleGymnastClick"></GymnastComponent>
+					}
+				</ul>
+			</div>
 		</div>
-		<div class="row">
-			<ul>
-				@foreach (var gymnast in gymnastList)
-				{
-					<GymnastComponent Gymnast="gymnast"></GymnastComponent>
-				}
-			</ul>
+		<div class="col-md-9">
+			@foreach (var gymnastRow in gymnastRows)
+			{
+				<div class="row">
+					<ul class="list-group list-group-horizontal">
+						@foreach (var gymnast in gymnastRow.Gymnasts)
+						{
+							<GymnastComponent FloorSpace="true" Gymnast="gymnast" Clicked="ChildComponentIsClicked(gymnast)" ReturnGymnast="@HandleGymnastClick"></GymnastComponent>
+						}
+					</ul>
+				</div>
+			}
 		</div>
-	</div>
-	<div class="col-9">
-		@foreach (var gymnast in gymnastsOnFloor)
-		{
-			<GymnastComponent ReturnGymnast="@HandleGymnastClick" Gymnast="gymnast"></GymnastComponent>
-		}
-	</div>
-	<div>
-		<p>@addGymnastName</p>
-		<GymnastComponent Gymnast="currentlyClickedGymnast"></GymnastComponent>
 
 	</div>
 </div>
 
 @code {
+
+	[Parameter]
+	public int FloorRows { get; set; } = 6;
+
+	[Parameter]
+	public int FloorColumns { get; set; } = 8;
+
 	private IList<Gymnast> gymnastList = new List<Gymnast>();
 
+	private IList<GymnastRow> gymnastRows = new List<GymnastRow>();
+
+	private Gymnast currentlyClickedGymnast = new Gymnast();
+
+	protected override async Task OnInitializedAsync()
+	{
+		for (int i = 0; i < FloorRows; i++)
+		{
+			var gymnastRow = new GymnastRow() { RowNumber = i };
+
+			for (int o = 0; o < FloorColumns; o++)
+			{
+				var gymnast = new Gymnast();
+
+				gymnastRow.Gymnasts.Add(gymnast);
+			}
+
+			gymnastRows.Add(gymnastRow);
+		}
+
+		gymnastList.Add(new Gymnast() { Name = "Gymnast 1" });
+		gymnastList.Add(new Gymnast() { Name = "Gymnast 2" });
+		gymnastList.Add(new Gymnast() { Name = "Gymnast 3" });
+		gymnastList.Add(new Gymnast() { Name = "Gymnast 4" });
+		gymnastList.Add(new Gymnast() { Name = "Gymnast 5" });
+		gymnastList.Add(new Gymnast() { Name = "Gymnast 6" });
+		gymnastList.Add(new Gymnast() { Name = "Gymnast 7" });
+		gymnastList.Add(new Gymnast() { Name = "Gymnast 8" });
+		gymnastList.Add(new Gymnast() { Name = "Gymnast 9" });
+	}
+
+	private bool ChildComponentIsClicked(Gymnast gymnast)
+	{
+		return currentlyClickedGymnast == gymnast;
+	}
+
 	private string addGymnastName;
+
+	public void AddGymnastEnter(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter")
+		{
+			AddGymnast();
+		}
+	}
 
 	public void AddGymnast()
 	{
 		if (!string.IsNullOrEmpty(addGymnastName))
 		{
 			gymnastList.Add(new Gymnast() { Name = addGymnastName });
+			Console.WriteLine(addGymnastName);
 			addGymnastName = string.Empty;
 		}
 	}
 
-	private IList<Gymnast> gymnastsOnFloor = new List<Gymnast>();
-
-	private Gymnast currentlyClickedGymnast = new Gymnast();
-
-	public void HandleGymnastClick(Gymnast? gymnast)
+	public void AddRow()
 	{
+		var gymnasts = new List<Gymnast>();
+
+		for (int i = 0; i < gymnastRows.First().Gymnasts.Count; i++)
+		{
+			gymnasts.Add(new Gymnast());
+		}
+
+		gymnastRows.Add(new GymnastRow() { RowNumber = gymnastRows.Count, Gymnasts = gymnasts });
+		Console.WriteLine(gymnastRows.Count);
+
+		this.StateHasChanged();
+	}
+
+	public void AddColumn()
+	{
+		foreach (var gymnastRow in gymnastRows)
+		{
+			gymnastRow.Gymnasts.Add(new Gymnast());
+		}
+		Console.WriteLine(gymnastRows.First().Gymnasts.Count);
+
+		this.StateHasChanged();
+	}
+
+	public void HandleGymnastClick(Gymnast gymnast)
+	{
+		Console.WriteLine(gymnast.ToString());
+		foreach (var gymnastPrint in gymnastList)
+		{
+			Console.WriteLine(gymnastPrint.Name + " - " + gymnastList.IndexOf(gymnastPrint));
+		}
 		if (gymnast == null)
 		{
 			currentlyClickedGymnast = null;
 		}
 		else
 		{
-			if (currentlyClickedGymnast == null)
+			if (currentlyClickedGymnast.Name == null)
 			{
 				currentlyClickedGymnast = gymnast;
+				Console.WriteLine("current gymnast: " + currentlyClickedGymnast.Name);
 			}
 			else
 			{
-				if (gymnastsOnFloor.Contains(currentlyClickedGymnast) && gymnastList.Contains(gymnast) || gymnastsOnFloor.Contains(gymnast) && gymnastList.Contains(currentlyClickedGymnast))
+				if (gymnastRows.Any(row => row.Gymnasts.Contains(currentlyClickedGymnast)) && gymnastRows.Any(row => row.Gymnasts.Contains(gymnast)) && currentlyClickedGymnast == gymnast)
 				{
-					var onFloorIndex = gymnastsOnFloor.IndexOf(currentlyClickedGymnast);
+					Console.WriteLine("Remove from floor: " + currentlyClickedGymnast.Name + " " + gymnast.Name);
+
+					gymnastList.Add(gymnast);
+
+					var gymnastOnFloorRowIndex = gymnastRows.First(row => row.Gymnasts.Contains(gymnast)).RowNumber;
+					var gymnastOnFloorColumnIndex = gymnastRows[gymnastOnFloorRowIndex].Gymnasts.IndexOf(gymnast);
+
+					gymnastRows[gymnastOnFloorRowIndex].Gymnasts[gymnastOnFloorColumnIndex] = new Gymnast();
+				}
+				else if (gymnastList.Contains(currentlyClickedGymnast) && gymnastList.Contains(gymnast))
+				{
+					Console.WriteLine("Switch in list: " + currentlyClickedGymnast.Name + " " + gymnast.Name);
+					var currentGymnastListIndex = gymnastList.IndexOf(currentlyClickedGymnast);
+
 					var gymnastListIndex = gymnastList.IndexOf(gymnast);
+
 					var tempGymnast = currentlyClickedGymnast;
-					gymnastsOnFloor[onFloorIndex] = gymnast;
+
+					gymnastList[currentGymnastListIndex] = gymnast;
 					gymnastList[gymnastListIndex] = tempGymnast;
 				}
-				else if (gymnastsOnFloor.Contains(currentlyClickedGymnast) && gymnastsOnFloor.Contains(gymnast))
+				else if (gymnastList.Contains(currentlyClickedGymnast) && gymnastRows.Any(row => row.Gymnasts.Contains(gymnast)))
 				{
-					var onFloorIndex = gymnastsOnFloor.IndexOf(currentlyClickedGymnast);
-					var onFloorSwitchIndex = gymnastsOnFloor.IndexOf(gymnast);
+					Console.WriteLine("Switch in to floor " + currentlyClickedGymnast.Name + " " + gymnast.Name);
+					var gymnastListRowIndex = gymnastList.IndexOf(currentlyClickedGymnast);
+
+					var gymnastOnFloorRowIndex = gymnastRows.First(row => row.Gymnasts.Contains(gymnast)).RowNumber;
+					var gymnastOnFloorColumnIndex = gymnastRows[gymnastOnFloorRowIndex].Gymnasts.IndexOf(gymnast);
+
 					var tempGymnast = currentlyClickedGymnast;
-					gymnastsOnFloor[onFloorIndex] = gymnast;
-					gymnastsOnFloor[onFloorSwitchIndex] = tempGymnast;
+
+					gymnastList[gymnastListRowIndex] = gymnast;
+					gymnastRows[gymnastOnFloorRowIndex].Gymnasts[gymnastOnFloorColumnIndex] = tempGymnast;
+
+					if (gymnastList[gymnastListRowIndex].Name == null)
+					{
+						gymnastList.RemoveAt(gymnastListRowIndex);
+					}
 				}
-				else
+				else if (gymnastList.Contains(gymnast) && gymnastRows.Any(row => row.Gymnasts.Contains(currentlyClickedGymnast)))
 				{
-					currentlyClickedGymnast = null;
+					Console.WriteLine("Switch of from floor " + currentlyClickedGymnast.Name + " " + gymnast.Name);
+					var gymnastListRowIndex = gymnastList.IndexOf(gymnast);
+
+					var gymnastOnFloorRowIndex = gymnastRows.First(row => row.Gymnasts.Contains(currentlyClickedGymnast)).RowNumber;
+					var gymnastOnFloorColumnIndex = gymnastRows[gymnastOnFloorRowIndex].Gymnasts.IndexOf(currentlyClickedGymnast);
+
+					var tempGymnast = gymnast;
+
+					gymnastList[gymnastListRowIndex] = currentlyClickedGymnast;
+					gymnastRows[gymnastOnFloorRowIndex].Gymnasts[gymnastOnFloorColumnIndex] = tempGymnast;
+
+					if (gymnastList[gymnastListRowIndex].Name == null)
+					{
+						gymnastList.RemoveAt(gymnastListRowIndex);
+					}
 				}
+				else if (gymnastRows.Any(row => row.Gymnasts.Contains(currentlyClickedGymnast)) && gymnastRows.Any(row => row.Gymnasts.Contains(gymnast)))
+				{
+					Console.WriteLine("Switch on floor: " + currentlyClickedGymnast.Name + " " + gymnast.Name);
+					var gymnastOnFloorRowIndex = gymnastRows.First(row => row.Gymnasts.Contains(currentlyClickedGymnast)).RowNumber;
+					var gymnastOnFloorColumnIndex = gymnastRows[gymnastOnFloorRowIndex].Gymnasts.IndexOf(currentlyClickedGymnast);
+
+					var gymnastOnFloorSwitchRowIndex = gymnastRows.First(row => row.Gymnasts.Contains(gymnast)).RowNumber;
+					var gymnastOnFloorSwitchColumnIndex = gymnastRows[gymnastOnFloorSwitchRowIndex].Gymnasts.IndexOf(gymnast);
+
+					var tempGymnast = currentlyClickedGymnast;
+
+					gymnastRows[gymnastOnFloorRowIndex].Gymnasts[gymnastOnFloorColumnIndex] = gymnast;
+					gymnastRows[gymnastOnFloorSwitchRowIndex].Gymnasts[gymnastOnFloorSwitchColumnIndex] = tempGymnast;
+				}
+
+				currentlyClickedGymnast = new Gymnast();
+			}
+
+			foreach (var gymnastPrint in gymnastList)
+			{
+				Console.WriteLine(gymnastPrint.Name + " - " + gymnastList.IndexOf(gymnastPrint));
 			}
 		}
-		this.StateHasChanged();
 
+		gymnastList = gymnastList.OrderBy(x => x.Name.ToLower()).ToList();
+		this.StateHasChanged();
 	}
 }
