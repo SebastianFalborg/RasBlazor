@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Blazored.LocalStorage;
 using Umbraco.Headless.Client.Net.Configuration;
 using Umbraco.Headless.Client.Net.Security;
+using Blazored.Modal;
 
 namespace RasBlazor
 {
@@ -16,6 +17,7 @@ namespace RasBlazor
 		{
 			var builder = WebAssemblyHostBuilder.CreateDefault(args);
 			builder.Services.AddSingleton<LocalStorageService>();
+			builder.Services.AddBlazoredModal();
 			builder.RootComponents.Add<App>("app");
 
 			await builder.Build().RunAsync();

@@ -1,0 +1,46 @@
+﻿@using System.Text.RegularExpressions
+@inject IModalService Modal
+
+<button @onclick="ShowModal" class="btn btn-success form-control mb-2">Tilføj Gymnaster</button>
+
+@code {
+	private IList<Gymnast> gymnasts { get; set; }
+
+	[Parameter]
+	public EventCallback<IList<Gymnast>> ReturnGymnasts { get; set; }
+
+	private async void InvokeParentMethod()
+	{
+		if (ReturnGymnasts.HasDelegate)
+		{
+			await ReturnGymnasts.InvokeAsync(gymnasts);
+		}
+	}
+
+	private string importString;
+
+	async Task ShowModal()
+	{
+		var messageForm = Modal.Show<AddGymnastsModalComponent>();
+		var result = await messageForm.Result;
+
+		if (!result.Cancelled)
+		{
+			importString = result.Data?.ToString() ?? string.Empty;
+
+			var gymnastNames = Regex.Split(importString, "\r\n|\r|\n");
+
+			if (gymnastNames.Length > 0)
+			{
+				gymnasts = new List<Gymnast>();
+
+				foreach (var gymnastName in gymnastNames)
+				{
+					gymnasts.Add(new Gymnast() { Name = gymnastName });
+				}
+			}
+
+			InvokeParentMethod();
+		}
+	}
+}

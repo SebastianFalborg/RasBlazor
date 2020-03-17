@@ -2,15 +2,11 @@
 
 <div class="container">
 	<div class="row">
-		<div class="col-md-3">
+		<div class="col-md-3 col-lg-3">
 			<div class="row">
-				<button @onclick="AddRow">Add row</button>
-				<button @onclick="AddColumn">Add column</button>
-				<p>CurrentGymnast: @currentlyClickedGymnast.Name</p>
-			</div>
-			<div class="row">
-				<input placeholder="Gymnast navn" @bind="addGymnastName" @onkeyup="AddGymnast" />
-				<button @onclick="AddGymnast">Add todo</button>
+				<AddGymnastsComponent ReturnGymnasts="@AddGymnastsFromModal"></AddGymnastsComponent>
+				<input class="form-control mb-1" placeholder="Gymnast navn" @bind="addGymnastName" @onkeyup="AddGymnast" />
+				<button class="btn btn-info" @onclick="AddGymnast">Tilføj Gymnast</button>
 			</div>
 			<div class="row">
 				<ul class="list-group">
@@ -21,7 +17,7 @@
 				</ul>
 			</div>
 		</div>
-		<div class="col-md-9">
+		<div class="col-md-9 col-lg-9">
 			@foreach (var gymnastRow in gymnastRows)
 			{
 				<div class="row">
@@ -33,6 +29,8 @@
 					</ul>
 				</div>
 			}
+			<button class="btn btn-info" @onclick="AddRow">Tilføj række</button>
+			<button class="btn btn-info" @onclick="AddColumn">Tilføj kolonne</button>
 		</div>
 
 	</div>
@@ -67,16 +65,6 @@
 
 			gymnastRows.Add(gymnastRow);
 		}
-
-		gymnastList.Add(new Gymnast() { Name = "Gymnast 1" });
-		gymnastList.Add(new Gymnast() { Name = "Gymnast 2" });
-		gymnastList.Add(new Gymnast() { Name = "Gymnast 3" });
-		gymnastList.Add(new Gymnast() { Name = "Gymnast 4" });
-		gymnastList.Add(new Gymnast() { Name = "Gymnast 5" });
-		gymnastList.Add(new Gymnast() { Name = "Gymnast 6" });
-		gymnastList.Add(new Gymnast() { Name = "Gymnast 7" });
-		gymnastList.Add(new Gymnast() { Name = "Gymnast 8" });
-		gymnastList.Add(new Gymnast() { Name = "Gymnast 9" });
 	}
 
 	private bool ChildComponentIsClicked(Gymnast gymnast)
@@ -235,5 +223,16 @@
 
 		gymnastList = gymnastList.OrderBy(x => x.Name.ToLower()).ToList();
 		this.StateHasChanged();
+	}
+
+	private void AddGymnastsFromModal(IList<Gymnast> gymnasts)
+	{
+		foreach (var gymnast in gymnasts)
+		{
+			Console.WriteLine(gymnast.Name);
+			gymnastList.Add(gymnast);
+		}
+
+		gymnastList = gymnastList.OrderBy(x => x.Name.ToLower()).ToList();
 	}
 }
